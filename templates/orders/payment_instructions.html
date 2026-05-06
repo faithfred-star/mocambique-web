@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <div class="glass-card p-8 text-center">
+        <!-- Ícone de Relógio/Aguardando -->
+        <div class="w-20 h-20 bg-cyan-400/10 rounded-full flex items-center justify-center mx-auto mb-6">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+        </div>
+        
+        <h1 class="text-3xl font-bold mb-2 uppercase">Aguardando Pagamento</h1>
+        <p class="text-gray-400 mb-2">Por favor, insira os detalhes da sua conta <strong>Movitel (e-Mola)</strong> para processar o pagamento de <span class="text-white font-bold">{{ order.total_amount }} MT</span>.</p>
+        <!-- Frase de Segurança Solicitada -->
+        <p class="text-cyan-400 text-sm font-bold uppercase tracking-widest mb-8">Secured payment by e-Mola</p>
+
+        <form method="POST" action="{% url 'process_payment' order.id %}" class="space-y-6 text-left">
+            {% csrf_token %}
+            
+            <!-- Campo de Telefone com Prefixo +258 -->
+            <div>
+                <label class="block text-xs font-bold text-gray-400 uppercase mb-2 tracking-widest">Número de Telefone Movitel</label>
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-gray-500 text-lg tracking-widest">+258</span>
+                    <input type="tel" name="payment_phone" placeholder="86XXXXXXX" required 
+                           class="w-full bg-white/5 border border-white/10 rounded p-4 pl-16 focus:outline-none focus:border-cyan-400 text-white text-lg tracking-widest">
+                </div>
+            </div>
+            
+            <!-- Campo de PIN -->
+            <div>
+                <label class="block text-xs font-bold text-gray-400 uppercase mb-2 tracking-widest">PIN de Pagamento e-Mola</label>
+                <input type="password" name="payment_pin" placeholder="••••" required maxlength="4" 
+                       class="w-full bg-white/5 border border-white/10 rounded p-4 focus:outline-none focus:border-cyan-400 text-white text-lg tracking-widest">
+                <p class="text-[10px] text-gray-500 mt-2 uppercase tracking-tighter">🔒 O seu PIN é encriptado e processado de forma segura pela Movitel.</p>
+            </div>
+
+            <!-- Botão de Submissão -->
+            <button type="submit" class="w-full bg-white text-black font-bold py-4 rounded-lg hover:bg-gray-200 transition uppercase tracking-widest flex items-center justify-center">
+                <span>Confirmar e Pagar</span>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-2" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                </svg>
+            </button>
+        </form>
+
+        <div class="mt-8 pt-8 border-t border-white/5">
+            <p class="text-xs text-gray-500 uppercase tracking-widest">ID do Pedido: #{{ order.id }}</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

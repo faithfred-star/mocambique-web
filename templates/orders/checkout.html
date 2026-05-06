@@ -1,0 +1,159 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto">
+    <!-- Cabeçalho do Checkout -->
+    <div class="flex items-center mb-8">
+        <a href="{% url 'index' %}" class="mr-4 p-2 glass-card hover:bg-white/10">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+        </a>
+        <div>
+            <h1 class="text-2xl font-bold uppercase">Checkout Seguro</h1>
+            <p class="text-cyan-400 text-xs uppercase">Envio para Moçambique</p>
+        </div>
+    </div>
+
+    <form method="POST" action="{% url 'checkout' %}" class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {% csrf_token %}
+        
+        <!-- Resumo do Pedido (Coluna Esquerda) -->
+        <div class="lg:col-span-1">
+            <div class="glass-card p-6">
+                <h2 class="text-sm font-bold mb-6 uppercase text-gray-400">Resumo do Pedido</h2>
+                <div class="flex items-center mb-6">
+                    <div class="w-16 h-16 glass-card p-2 mr-4">
+                        <img id="kit-img" src="" alt="Produto" class="w-full h-full object-contain">
+                    </div>
+                    <div>
+                        <div id="kit-name" class="font-bold uppercase">---</div>
+                        <div id="kit-price" class="text-cyan-400">--- MT</div>
+                    </div>
+                </div>
+                
+                <div class="space-y-2 border-t border-white/10 pt-4 mb-4">
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-400">Subtotal</span>
+                        <span id="subtotal">--- MT</span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-400">Envio</span>
+                        <span id="shipping-cost">0 MT</span>
+                    </div>
+                </div>
+                
+                <div class="flex justify-between items-center pt-4 border-t border-white/10">
+                    <span class="font-bold text-xl">TOTAL</span>
+                    <span id="total-display" class="font-bold text-xl text-cyan-400">--- MT</span>
+                    <input type="hidden" name="total_amount" id="total_amount_input" value="">
+                </div>
+            </div>
+        </div>
+
+        <!-- Formulário de Envio e Pagamento (Coluna Direita) -->
+        <div class="lg:col-span-2 space-y-8">
+            <!-- Dados do Cliente -->
+            <div class="glass-card p-8">
+                <h2 class="text-sm font-bold mb-6 uppercase text-gray-400">Envio e Identidade</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <input type="text" name="fullName" placeholder="NOME COMPLETO" required class="bg-white/5 border border-white/10 rounded p-3 focus:outline-none focus:border-cyan-400 text-white">
+                    <input type="text" name="nationalId" placeholder="BI / PASSAPORTE" required class="bg-white/5 border border-white/10 rounded p-3 focus:outline-none focus:border-cyan-400 text-white">
+                    <input type="email" name="email" placeholder="ENDEREÇO DE EMAIL" required class="bg-white/5 border border-white/10 rounded p-3 focus:outline-none focus:border-cyan-400 text-white">
+                    <input type="tel" name="phone" placeholder="NÚMERO DE TELEFONE (+258)" required class="bg-white/5 border border-white/10 rounded p-3 focus:outline-none focus:border-cyan-400 text-white">
+                    <input type="text" name="contactPerson" placeholder="NOME DA PESSOA DE CONTACTO" class="bg-white/5 border border-white/10 rounded p-3 focus:outline-none focus:border-cyan-400 text-white">
+                    <input type="tel" name="altPhone" placeholder="NÚMERO ALTERNATIVO" class="bg-white/5 border border-white/10 rounded p-3 focus:outline-none focus:border-cyan-400 text-white">
+                    <input type="text" name="city" placeholder="CIDADE / PROVÍNCIA" required class="bg-white/5 border border-white/10 rounded p-3 focus:outline-none focus:border-cyan-400 text-white">
+                    <input type="text" name="address" placeholder="ENDEREÇO / PONTO DE REFERÊNCIA" required class="bg-white/5 border border-white/10 rounded p-3 focus:outline-none focus:border-cyan-400 text-white">
+                </div>
+            </div>
+
+            <!-- Método de Entrega -->
+            <div class="glass-card p-8">
+                <h2 class="text-sm font-bold mb-6 uppercase text-gray-400">Método de Entrega</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <label class="relative cursor-pointer group">
+                        <input type="radio" name="delivery_method" value="town" checked class="peer sr-only">
+                        <div class="p-4 border border-white/10 rounded peer-checked:border-cyan-400 peer-checked:bg-cyan-400/10 transition group-hover:border-white/30">
+                            <div class="font-bold uppercase text-xs">Recolha na Cidade</div>
+                            <div class="text-[10px] text-gray-400 uppercase">Hub Padrão</div>
+                        </div>
+                    </label>
+                    <label class="relative cursor-pointer group">
+                        <input type="radio" name="delivery_method" value="door" class="peer sr-only">
+                        <div class="p-4 border border-white/10 rounded peer-checked:border-cyan-400 peer-checked:bg-cyan-400/10 transition group-hover:border-white/30">
+                            <div class="font-bold uppercase text-xs">Entrega ao Domicílio</div>
+                            <div class="text-[10px] text-gray-400 uppercase">+1500 MT Taxa Premium</div>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Método de Pagamento Exclusivo -->
+            <div class="glass-card p-8 border-l-4 border-cyan-400">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-sm font-bold uppercase text-gray-400">Pagamento Digital</h2>
+                    <span class="text-cyan-400 text-[10px] font-bold uppercase tracking-widest">Secured payment by e-Mola</span>
+                </div>
+                <div class="grid grid-cols-1 gap-4">
+                    <label class="relative cursor-pointer">
+                        <input type="radio" name="payment_method" value="movitel" checked class="peer sr-only">
+                        <div class="p-4 border border-cyan-400 bg-cyan-400/10 rounded text-center">
+                            <div class="font-bold text-white uppercase">Movitel (e-Mola)</div>
+                            <div class="text-[10px] text-gray-400 uppercase">Pagamento Instantâneo</div>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <button type="submit" class="w-full bg-white text-black font-bold py-4 rounded-lg hover:bg-gray-200 transition uppercase tracking-widest shadow-xl">
+                Finalizar Pedido
+            </button>
+            <p class="text-center text-[10px] text-gray-500 uppercase tracking-widest">🔒 Transação Segura via Satélite</p>
+        </div>
+    </form>
+</div>
+
+<!-- Lógica de Produtos e Preços -->
+<script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const kit = urlParams.get('kit') || '1'; // Default para Gen 3
+    
+    // Mapeamento atualizado para imagens JPG e IDs solicitados
+    const products = {
+        '1': { name: 'KIT GEN 3', price: 3500, img: '/static/img/1.jpg' },
+        '2': { name: 'KIT GEN 2', price: 2500, img: '/static/img/2.jpg' },
+        'mini': { name: 'STARLINK MINI', price: 1500, img: '/static/img/mini.jpg' },
+        'adaptor': { name: 'ADAPTADOR ETHERNET', price: 450, img: '/static/img/adaptor.jpg' },
+        'mesh': { name: 'NÓ WI-FI MESH', price: 900, img: '/static/img/mesh.jpg' },
+        'cable': { name: 'CABO DE 75 PÉS', price: 600, img: '/static/img/cable.jpg' },
+        'pivot': { name: 'SUPORTE PIVOTANTE', price: 500, img: '/static/img/pivot.jpg' }
+    };
+
+    const selectedProduct = products[kit] || products['1'];
+
+    // Inicializa a interface com o produto selecionado
+    document.getElementById('kit-name').innerText = selectedProduct.name;
+    document.getElementById('kit-price').innerText = selectedProduct.price + ' MT';
+    document.getElementById('kit-img').src = selectedProduct.img;
+    document.getElementById('subtotal').innerText = selectedProduct.price + ' MT';
+
+    function updateTotal() {
+        const delivery = document.querySelector('input[name="delivery_method"]:checked').value;
+        const shippingCost = delivery === 'door' ? 1500 : 0;
+        const total = selectedProduct.price + shippingCost;
+        
+        document.getElementById('shipping-cost').innerText = shippingCost + ' MT';
+        document.getElementById('total-display').innerText = total + ' MT';
+        document.getElementById('total_amount_input').value = total;
+    }
+
+    // Listener para mudanças no frete
+    document.querySelectorAll('input[name="delivery_method"]').forEach(input => {
+        input.addEventListener('change', updateTotal);
+    });
+
+    // Cálculo inicial
+    updateTotal();
+</script>
+{% endblock %}

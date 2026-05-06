@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <div class="glass-card p-8 text-center">
+        <div class="w-20 h-20 bg-cyan-400/10 rounded-full flex items-center justify-center mx-auto mb-6">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+            </svg>
+        </div>
+        
+        <h1 class="text-3xl font-bold mb-2 uppercase">Verificação OTP</h1>
+        <p class="text-gray-400 mb-8">Enviámos um código de verificação para o seu número. Por favor, insira-o abaixo para confirmar o pagamento de <span class="text-white font-bold">{{ order.total_amount }} MT</span>.</p>
+
+        <form method="POST" action="{% url 'verify_otp' order.id %}" class="space-y-6 text-left">
+            {% csrf_token %}
+            <div>
+                <label class="block text-xs font-bold text-gray-400 uppercase mb-2 tracking-widest">Código OTP</label>
+                <input type="text" name="otp_code" placeholder="XXXX" required maxlength="4" class="w-full bg-white/5 border border-white/10 rounded p-4 focus:outline-none focus:border-cyan-400 text-white text-center text-2xl tracking-[1em] font-bold">
+            </div>
+
+            {% if error %}
+                <p class="text-red-500 text-sm">{{ error }}</p>
+            {% endif %}
+            {% if message %}
+                <p class="text-green-500 text-sm">{{ message }}</p>
+            {% endif %}
+
+            <button type="submit" class="w-full bg-white text-black font-bold py-4 rounded-lg hover:bg-gray-200 transition uppercase tracking-widest">
+                Confirmar Pagamento
+            </button>
+        </form>
+
+        <div class="mt-6">
+            <form id="resend-otp-form" method="POST" action="{% url 'resend_otp' order.id %}">
+                {% csrf_token %}
+                <button type="submit" id="resend-otp-button" class="text-cyan-400 text-xs uppercase font-bold tracking-widest hover:text-cyan-300 transition" {% if resend_limit_reached %}disabled{% endif %}>
+                    Reenviar Código
+                </button>
+            </form>
+            <p class="text-gray-500 text-xs mt-2">Reenvios restantes: <span id="resend-count">{{ 10 - resend_count }}</span>/10</p>
+        </div>
+
+        <div class="mt-8 pt-8 border-t border-white/5">
+            <p class="text-xs text-gray-500 uppercase tracking-widest">ID do Pedido: #{{ order.id }}</p>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const resendButton = document.getElementById('resend-otp-button');
+        const resendCountSpan = document.getElementById('resend-count');
+        let currentResendCount = parseInt(resendCountSpan.textContent.split('/')[0]);
+
+        if (currentResendCount <= 0) {
+            resendButton.disabled = true;
+        }
+    });
+</script>
+{% endblock %}
